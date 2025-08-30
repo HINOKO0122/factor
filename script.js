@@ -1,10 +1,17 @@
+function renderLatex() {
+  if (window.MathJax) {
+    MathJax.typeset();
+  } else {
+    setTimeout(renderLatex, 300);
+  }
+}
+
 function factorize() {
   const expr = document.getElementById("expression").value.trim();
   const resultsDiv = document.getElementById("results");
-  const historyList = document.getElementById("history");
 
-  if (!expr) {
-    resultsDiv.innerHTML = "<p style='color:red;'>式を入力してください。</p>";
+  if (!expr || /[\+\-\*\/\^]$/.test(expr)) {
+    resultsDiv.innerHTML = "<p style='color:red;'>式が不完全です。構文を確認してください。</p>";
     return;
   }
 
@@ -16,21 +23,20 @@ function factorize() {
       <p><strong>整数係数での因数分解結果：</strong></p>
       <p>\\[ ${latex} \\]</p>
     `;
-    MathJax.typeset();
+    renderLatex();
 
-    // 履歴保存
     const entry = { input: expr, output: latex };
     saveToHistory(entry);
     renderHistory();
   } catch (error) {
-    resultsDiv.innerHTML = `<p style="color:red;">因数分解に失敗しました。構文を確認してください。</p>`;
+    resultsDiv.innerHTML = `<p style="color:red;">因数分解に失敗しました。式の構文を確認してください。</p>`;
   }
 }
 
 function saveToHistory(entry) {
   const history = JSON.parse(localStorage.getItem("factorHistory") || "[]");
-  history.unshift(entry); // 最新を先頭に
-  localStorage.setItem("factorHistory", JSON.stringify(history.slice(0, 10))); // 最大10件
+  history.unshift(entry);
+  localStorage.setItem("factorHistory", JSON.stringify(history.slice(0, 10)));
 }
 
 function renderHistory() {
@@ -44,8 +50,7 @@ function renderHistory() {
     historyList.appendChild(li);
   });
 
-  MathJax.typeset();
+  renderLatex();
 }
 
-// 初期表示
 renderHistory();
