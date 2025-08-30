@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>なんでも素因数分解君</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- スタイル -->
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background-color: #f0f8ff;
+      padding: 20px;
+      max-width: 700px;
+      margin: auto;
+      line-height: 1.6;
+    }
+    h1, h2 {
+      color: #2c3e50;
+    }
+    .input-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 1em;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 1em;
+    }
+    input {
+      flex: 1;
+      min-width: 180px;
+    }
+    button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    .result {
+      margin-top: 20px;
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    ul#history {
+      list-style: none;
+      padding-left: 0;
+    }
+    ul#history li {
+      background: #fff;
+      margin: 5px 0;
+      padding: 8px;
+      border-left: 4px solid #3498db;
+    }
+    .back-button {
+      margin-top: 40px;
+      text-align: center;
+    }
+    .back-button button {
+      background-color: #2ecc71;
+    }
+    @media screen and (max-width: 600px) {
+      body {
+        padding: 10px;
+      }
+      .input-group {
+        flex-direction: column;
+      }
+      input, button {
+        width: 100%;
+      }
+    }
+  </style>
+
+  <!-- Algebrite（因数分解エンジン） -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/algebrite/1.5.0/algebrite.min.js" defer></script>
+
+  <!-- MathJax（LaTeX描画） -->
+  <script id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <!-- ロジック -->
+  <script defer>
+    function waitForMathJax(callback) {
+      if (window.MathJax && typeof MathJax.typeset === "function") {
+        callback();
+      } else {
+        setTimeout(() => waitForMathJax(callback), 100);
+      }
+    }
+
+    function renderLaTeX() {
+      waitForMathJax(() => MathJax.typeset());
+    }
+
+    function renderHistory() {
+      const history = JSON.parse(localStorage.getItem("factorHistory") || "[]");
+      const list = document.getElementById("history");
+      list.innerHTML = "";
+      history.forEach(({ input, output }) => {
+        const li = document.createElement("li");
+        li.innerHTML = `式: ${input}<br>結果: \\( ${output} \\)`;
+        list.appendChild(li);
+      });
+      renderLaTeX();
+    }
+
+    function saveToHistory(entry) {
+      const history = JSON.parse(localStorage.getItem("factorHistory") || "[]");
+      history.unshift(entry);
+      localStorage.setItem("factorHistory", JSON.stringify(history.slice(0, 10)));
+    }
+
+    function factorize() {
+      const expr = document.getElementById("expression").value.trim();
+      const resultsDiv = document.getElementById("results");
+
+      if (!expr || /[\+\-\*\/\^]$/.test(expr)) {
+        resultsDiv.innerHTML = "<p style='color:red;'>式が不完全です。構文を確認してください。</p>";
+        return;
+      }
+
+      try {
+        const latex = Algebrite.run(`printlatex(factor(${expr}))`);
+        resultsDiv.innerHTML = `
+          <p><strong>整数係数での因数分解結果：</strong></p>
+          <p>\\[ ${latex} \\]</p>
+        `;
+        renderLaTeX();
+        saveToHistory({ input: expr, output: latex });
+        renderHistory();
+      } catch (e) {
+        resultsDiv.innerHTML = `<p style="color:red;">因数分解に失敗しました。式を確認してください。</p>`;
+      }
+    }
+
+    function sendToFormatter() {
+      const expr = document.getElementById("expression").value.trim();
+      if (!expr) return;
+      const formatterUrl = "https://your-formatter.example.com/?expr=" + encodeURIComponent(expr);
+      window.open(formatterUrl, "_blank");
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("factorButton").addEventListener("click", factorize);
+      document.getElementById("formatterButton").addEventListener("click", sendToFormatter);
+      renderHistory();
+    });
+  </script>
+</head>
+<body>
+  <h1>🧠 なんでも素因数分解君</h1>
+  <p>式を入力してください（例：x^2 - 4）</p>
+
+  <div class="input-group">
+    <input type="text" id="expression" placeholder="式を入力">
+    <button id="factorButton">素因数分解する！</button>
+    <button id="formatterButton">式を数式トトノエ君へ</button>
+  </div>
+
+  <div class="result" id="results"></div>
+
+  <h2>📜 履歴</h2>
+  <ul id="history"></ul>
+
+  <div class="back-button">
+    <a href="https://wiki3.jp/iwakuni-mathclub" target="_blank">
+      <button>岩校数研トップへ戻る</button>
+    </a>
+  </div>
+</body>
+</html>
