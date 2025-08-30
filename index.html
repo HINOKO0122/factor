@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>なんでも素因数分解君</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background-color: #f9f9f9; }
+    h1 { color: #333; }
+    input, button { padding: 10px; margin: 10px 0; width: 100%; max-width: 400px; }
+    .result { margin-top: 20px; }
+    .back-button { margin-top: 40px; }
+  </style>
+</head>
+<body>
+  <h1>🧠 なんでも素因数分解君</h1>
+  <p>式を入力してください（例：x^2 - 4）</p>
+  <input type="text" id="expression" placeholder="式を入力">
+  <button onclick="factorize()">素因数分解する</button>
+
+  <div class="result" id="results"></div>
+
+  <div class="back-button">
+    <a href="https://wiki3.jp/iwakuni-mathclub">
+      <button>岩校数研トップへ戻る</button>
+    </a>
+  </div>
+
+  <script>
+    function factorize() {
+      const expr = document.getElementById("expression").value;
+      const resultsDiv = document.getElementById("results");
+
+      // 仮の分解ロジック（実際は数式解析ライブラリが必要）
+      const integerFactor = `整数係数: (${expr}) の因数分解結果（例: (x - 2)(x + 2)）`;
+      const realFactor = `実数係数: (${expr}) の因数分解結果（例: (x - √2)(x + √2)）`;
+      const complexFactor = `複素係数: (${expr}) の因数分解結果（例: (x - 2i)(x + 2i)）`;
+      const rationalFactor = `有理係数: (${expr}) の因数分解結果（例: (x - 1/2)(x + 1/2)）`;
+
+      resultsDiv.innerHTML = `
+        <p>${integerFactor}</p>
+        <p>${realFactor}</p>
+        <p>${complexFactor}</p>
+        <p>${rationalFactor}</p>
+      `;
+    }
+  </script>
+</body>
+</html>
