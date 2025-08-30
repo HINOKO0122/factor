@@ -1,4 +1,3 @@
-// MathJax の読み込み完了を待ってから typeset() を呼ぶ
 function waitForMathJax(callback) {
   if (window.MathJax && typeof MathJax.typeset === "function") {
     callback();
@@ -6,11 +5,11 @@ function waitForMathJax(callback) {
     setTimeout(() => waitForMathJax(callback), 100);
   }
 }
+
 function renderLaTeX() {
   waitForMathJax(() => MathJax.typeset());
 }
 
-// localStorage から履歴を読み込み、最大10件表示
 function renderHistory() {
   const history = JSON.parse(localStorage.getItem("factorHistory") || "[]");
   const list = document.getElementById("history");
@@ -23,14 +22,12 @@ function renderHistory() {
   renderLaTeX();
 }
 
-// 履歴に追加して保存（最新10件まで）
 function saveToHistory(entry) {
   const history = JSON.parse(localStorage.getItem("factorHistory") || "[]");
   history.unshift(entry);
   localStorage.setItem("factorHistory", JSON.stringify(history.slice(0, 10)));
 }
 
-// 因数分解処理
 function factorize() {
   const expr = document.getElementById("expression").value.trim();
   const resultsDiv = document.getElementById("results");
@@ -41,37 +38,28 @@ function factorize() {
   }
 
   try {
-    // Algebrite で因数分解 → LaTeX 取得
     const latex = Algebrite.run(`printlatex(factor(${expr}))`);
     resultsDiv.innerHTML = `
       <p><strong>整数係数での因数分解結果：</strong></p>
       <p>\\[ ${latex} \\]</p>
     `;
     renderLaTeX();
-
     saveToHistory({ input: expr, output: latex });
     renderHistory();
-
   } catch (e) {
     resultsDiv.innerHTML = `<p style="color:red;">因数分解に失敗しました。式を確認してください。</p>`;
   }
 }
 
-// 数式トトノエ君に式を渡す（URLは要調整）
 function sendToFormatter() {
   const expr = document.getElementById("expression").value.trim();
   if (!expr) return;
-  // TODO: 実際の数式トトノエ君の URL をここに設定してください
-  const formatterUrl = "https://your-formatter.example.com/?expr=" 
-                     + encodeURIComponent(expr);
+  const formatterUrl = "https://your-formatter.example.com/?expr=" + encodeURIComponent(expr);
   window.open(formatterUrl, "_blank");
 }
 
-// 初期化
 document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("factorButton")
-          .addEventListener("click", factorize);
-  document.getElementById("formatterButton")
-          .addEventListener("click", sendToFormatter);
+  document.getElementById("factorButton").addEventListener("click", factorize);
+  document.getElementById("formatterButton").addEventListener("click", sendToFormatter);
   renderHistory();
 });
