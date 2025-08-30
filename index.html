@@ -4,16 +4,35 @@
   <meta charset="UTF-8">
   <title>なんでも素因数分解君</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- CSS -->
   <link rel="stylesheet" href="style.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/algebrite/1.5.0/algebrite.min.js"></script>
-  <script id="MathJax-script" async
-    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <!-- Algebrite (因数分解用) -->
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/algebrite/1.5.0/algebrite.min.js"
+    defer>
+  </script>
+
+  <!-- MathJax (LaTeX 描画用) -->
+  <script
+    id="MathJax-script"
+    async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+
+  <!-- 自作スクリプト -->
+  <script src="factor.js" defer></script>
 </head>
 <body>
   <h1>🧠 なんでも素因数分解君</h1>
   <p>式を入力してください（例：x^2 - 4）</p>
-  <input type="text" id="expression" placeholder="式を入力">
-  <button onclick="factorize()">素因数分解する</button>
+
+  <div class="input-group">
+    <input type="text" id="expression" placeholder="式を入力">
+    <button id="factorButton">素因数分解する！</button>
+    <button id="formatterButton">式を数式トトノエ君へ</button>
+  </div>
 
   <div class="result" id="results"></div>
 
@@ -25,7 +44,5 @@
       <button>岩校数研トップへ戻る</button>
     </a>
   </div>
-
-  <script src="script.js"></script>
 </body>
 </html>
