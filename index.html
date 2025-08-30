@@ -3,13 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <title>なんでも素因数分解君</title>
-  <style>
-    body { font-family: sans-serif; padding: 20px; background-color: #f9f9f9; }
-    h1 { color: #333; }
-    input, button { padding: 10px; margin: 10px 0; width: 100%; max-width: 400px; }
-    .result { margin-top: 20px; }
-    .back-button { margin-top: 40px; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/algebrite/1.5.0/algebrite.min.js"></script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
   <h1>🧠 なんでも素因数分解君</h1>
@@ -19,30 +18,15 @@
 
   <div class="result" id="results"></div>
 
+  <h2>📜 履歴</h2>
+  <ul id="history"></ul>
+
   <div class="back-button">
-    <a href="https://wiki3.jp/iwakuni-mathclub">
+    <a href="https://wiki3.jp/iwakuni-mathclub" target="_blank">
       <button>岩校数研トップへ戻る</button>
     </a>
   </div>
 
-  <script>
-    function factorize() {
-      const expr = document.getElementById("expression").value;
-      const resultsDiv = document.getElementById("results");
-
-      // 仮の分解ロジック（実際は数式解析ライブラリが必要）
-      const integerFactor = `整数係数: (${expr}) の因数分解結果（例: (x - 2)(x + 2)）`;
-      const realFactor = `実数係数: (${expr}) の因数分解結果（例: (x - √2)(x + √2)）`;
-      const complexFactor = `複素係数: (${expr}) の因数分解結果（例: (x - 2i)(x + 2i)）`;
-      const rationalFactor = `有理係数: (${expr}) の因数分解結果（例: (x - 1/2)(x + 1/2)）`;
-
-      resultsDiv.innerHTML = `
-        <p>${integerFactor}</p>
-        <p>${realFactor}</p>
-        <p>${complexFactor}</p>
-        <p>${rationalFactor}</p>
-      `;
-    }
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
