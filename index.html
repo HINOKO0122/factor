@@ -2,24 +2,108 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>Algebriteテスト</title>
+  <title>高次式の因数分解</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 1em; max-width: 600px; margin: auto; }
+    input, button { font-size: 1.2em; width: 100%; margin: 0.5em 0; padding: 0.5em; }
+    #output { margin-top: 1em; font-size: 1.2em; word-break: break-word; }
+  </style>
 </head>
 <body>
-  <h1>Algebriteテスト</h1>
-  <button onclick="testFactor()">因数分解テスト</button>
+  <h2>高次式の因数分解（有理係数）</h2>
+  <input id="inputExpr" value="x^3 - 6x^2 + 11x - 6">
+  <button onclick="factorPolynomial()">因数分解</button>
   <div id="output"></div>
 
-  <!-- Algebriteの読み込み -->
-  <script src="https://cdn.jsdelivr.net/npm/algebrite@1.5.0/dist/algebrite.bundle-for-browser.min.js"></script>
-
   <script>
-    function testFactor() {
+    function factorPolynomial() {
+      const expr = document.getElementById("inputExpr").value;
       try {
-        const result = Algebrite.run("factor(x^2 - 4)");
-        document.getElementById("output").innerText = result;
+        const poly = math.parse(expr).toString();
+        const coeffs = getCoefficients(poly);
+        const factors = rationalFactor(coeffs);
+        document.getElementById("output").innerText = factors.join('');
       } catch (e) {
         document.getElementById("output").innerText = "エラー: " + e.message;
       }
+    }
+
+    // 係数抽出（降べき順）
+    function getCoefficients(expr) {
+      const terms = expr.replace(/-/g, '+-').split('+').filter(t => t);
+      const degree = Math.max(...terms.map(t => {
+        const match = t.match(/x\^(\d+)/);
+        return match ? parseInt(match[1]) : t.includes('x') ? 1 : 0;
+      }));
+      const coeffs = Array(degree + 1).fill(0);
+      for (const term of terms) {
+        let coef = 0, deg = 0;
+        if (term.includes('x^')) {
+          const [c, d] = term.split('x^');
+          coef = parseFloat(c) || (c === '-' ? -1 : 1);
+          deg = parseInt(d);
+        } else if (term.includes('x')) {
+          coef = parseFloat(term.replace('x', '')) || (term === '-' ? -1 : 1);
+          deg = 1;
+        } else {
+          coef = parseFloat(term);
+          deg = 0;
+        }
+        coeffs[degree - deg] = coef;
+      }
+      return coeffs;
+    }
+
+    // Rational Root Theorem + Horner法
+    function rationalFactor(coeffs) {
+      const leading = coeffs[0];
+      const constant = coeffs[coeffs.length - 1];
+      const p = getFactors(constant);
+      const q = getFactors(leading);
+      const candidates = [];
+      for (const i of p) {
+        for (const j of q) {
+          candidates.push(i / j);
+          candidates.push(-i / j);
+        }
+      }
+
+      let factors = '';
+      let current = coeffs.slice();
+      for (const r of candidates) {
+        const result = syntheticDivide(current, r);
+        if (result.remainder === 0) {
+          factors += `(x - ${r})`;
+          current = result.quotient;
+        }
+      }
+
+      if (current.length === 1) return [factors];
+      const rest = current.map((c, i) => `${c !== 0 ? (i === current.length - 1 ? c : c + 'x^' + (current.length - 1 - i)) : ''}`).filter(Boolean).join(' + ');
+      return [factors, `(${rest})`];
+    }
+
+    function getFactors(n) {
+      n = Math.abs(n);
+      const factors = [];
+      for (let i = 1; i <= n; i++) {
+        if (n % i === 0) factors.push(i);
+      }
+      return factors;
+    }
+
+    function syntheticDivide(coeffs, root) {
+      const result = [];
+      let carry = coeffs[0];
+      result.push(carry);
+      for (let i = 1; i < coeffs.length; i++) {
+        carry = coeffs[i] + carry * root;
+        result.push(carry);
+      }
+      const remainder = result.pop();
+      return { quotient: result, remainder };
     }
   </script>
 </body>
