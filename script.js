@@ -1,15 +1,36 @@
+// MathJax の読み込み完了を待ってから typeset() を呼ぶ
 function waitForMathJax(callback) {
-  if (window.MathJax && MathJax.typeset) {
+  if (window.MathJax && typeof MathJax.typeset === "function") {
     callback();
   } else {
     setTimeout(() => waitForMathJax(callback), 100);
   }
 }
-
-function renderLatex() {
+function renderLaTeX() {
   waitForMathJax(() => MathJax.typeset());
 }
 
+// localStorage から履歴を読み込み、最大10件表示
+function renderHistory() {
+  const history = JSON.parse(localStorage.getItem("factorHistory") || "[]");
+  const list = document.getElementById("history");
+  list.innerHTML = "";
+  history.forEach(({ input, output }) => {
+    const li = document.createElement("li");
+    li.innerHTML = `式: ${input}<br>結果: \\( ${output} \\)`;
+    list.appendChild(li);
+  });
+  renderLaTeX();
+}
+
+// 履歴に追加して保存（最新10件まで）
+function saveToHistory(entry) {
+  const history = JSON.parse(localStorage.getItem("factorHistory") || "[]");
+  history.unshift(entry);
+  localStorage.setItem("factorHistory", JSON.stringify(history.slice(0, 10)));
+}
+
+// 因数分解処理
 function factorize() {
   const expr = document.getElementById("expression").value.trim();
   const resultsDiv = document.getElementById("results");
@@ -20,41 +41,37 @@ function factorize() {
   }
 
   try {
-    const factored = Algebrite.run(`factor(${expr})`);
+    // Algebrite で因数分解 → LaTeX 取得
     const latex = Algebrite.run(`printlatex(factor(${expr}))`);
-
     resultsDiv.innerHTML = `
       <p><strong>整数係数での因数分解結果：</strong></p>
       <p>\\[ ${latex} \\]</p>
     `;
-    renderLatex();
+    renderLaTeX();
 
-    const entry = { input: expr, output: latex };
-    saveToHistory(entry);
+    saveToHistory({ input: expr, output: latex });
     renderHistory();
-  } catch (error) {
-    resultsDiv.innerHTML = `<p style="color:red;">因数分解に失敗しました。式の構文を確認してください。</p>`;
+
+  } catch (e) {
+    resultsDiv.innerHTML = `<p style="color:red;">因数分解に失敗しました。式を確認してください。</p>`;
   }
 }
 
-function saveToHistory(entry) {
-  const history = JSON.parse(localStorage.getItem("factorHistory") || "[]");
-  history.unshift(entry);
-  localStorage.setItem("factorHistory", JSON.stringify(history.slice(0, 10)));
+// 数式トトノエ君に式を渡す（URLは要調整）
+function sendToFormatter() {
+  const expr = document.getElementById("expression").value.trim();
+  if (!expr) return;
+  // TODO: 実際の数式トトノエ君の URL をここに設定してください
+  const formatterUrl = "https://your-formatter.example.com/?expr=" 
+                     + encodeURIComponent(expr);
+  window.open(formatterUrl, "_blank");
 }
 
-function renderHistory() {
-  const history = JSON.parse(localStorage.getItem("factorHistory") || "[]");
-  const historyList = document.getElementById("history");
-  historyList.innerHTML = "";
-
-  history.forEach(item => {
-    const li = document.createElement("li");
-    li.innerHTML = `式: ${item.input}<br>結果: \\( ${item.output} \\)`;
-    historyList.appendChild(li);
-  });
-
-  renderLatex();
-}
-
-renderHistory();
+// 初期化
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("factorButton")
+          .addEventListener("click", factorize);
+  document.getElementById("formatterButton")
+          .addEventListener("click", sendToFormatter);
+  renderHistory();
+});
