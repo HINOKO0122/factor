@@ -1,9 +1,13 @@
-function renderLatex() {
-  if (window.MathJax) {
-    MathJax.typeset();
+function waitForMathJax(callback) {
+  if (window.MathJax && MathJax.typeset) {
+    callback();
   } else {
-    setTimeout(renderLatex, 300);
+    setTimeout(() => waitForMathJax(callback), 100);
   }
+}
+
+function renderLatex() {
+  waitForMathJax(() => MathJax.typeset());
 }
 
 function factorize() {
