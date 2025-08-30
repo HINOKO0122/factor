@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
   <meta charset="UTF-8">
   <title>Algebriteテスト</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/algebrite/1.5.0/algebrite.min.js"></script>
 </head>
 <body>
   <h1>Algebriteテスト</h1>
   <button onclick="testFactor()">因数分解テスト</button>
   <div id="output"></div>
+
+  <!-- Algebriteの読み込み -->
+  <script src="https://cdn.jsdelivr.net/npm/algebrite@1.5.0/dist/algebrite.bundle-for-browser.min.js"></script>
 
   <script>
     function testFactor() {
